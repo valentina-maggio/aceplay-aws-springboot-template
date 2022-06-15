@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-AceplayApplication<aceplay>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "tech.makers.aceplay.AceplayApplication",
+      "projectName": "aceplay",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
