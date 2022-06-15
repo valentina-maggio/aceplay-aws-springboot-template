@@ -15,18 +15,26 @@ public class Playlist {
 
   private String name;
 
+  private Boolean cool;
+
   @ManyToMany(fetch = FetchType.EAGER)
   private Set<Track> tracks;
 
-  public Playlist() {}
-
-  public Playlist(String name) {
-    this(name, null);
+  public Playlist() {
   }
 
-  public Playlist(String name, Set<Track> tracks) {
+  public Playlist(String name) {
+    this(name, false);
+  }
+
+  public Playlist(String name, Boolean isCool) {
+    this(name, isCool, null);
+  }
+
+  public Playlist(String name, Boolean isCool, Set<Track> tracks) {
     this.name = name;
     this.tracks = tracks;
+    this.cool = isCool;
   }
 
   public String getName() {
@@ -35,6 +43,10 @@ public class Playlist {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Boolean getCool() {
+    return cool;
   }
 
   public Long getId() {
@@ -51,6 +63,6 @@ public class Playlist {
 
   @Override
   public String toString() {
-    return String.format("Playlist[id=%d name='%s']", id, name);
+    return String.format("Playlist[id=%d name='%s' cool='%s']", id, name, cool);
   }
 }
