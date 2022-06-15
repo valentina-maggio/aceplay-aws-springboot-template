@@ -52,6 +52,28 @@ class PlaylistsControllerIntegrationTest {
 
   @Test
   @WithMockUser
+  void WhenLoggedIn_AndThereArePlaylists_PlaylistsReturnsCoolPlaylists() throws Exception {
+    repository.save(new Playlist("New Playlist", false));
+    repository.save(new Playlist("Another Playlist", true));
+    mvc.perform(MockMvcRequestBuilders.get("/api/playlists/cool").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(1)));
+  }
+
+  @Test
+  @WithMockUser
+  void WhenLoggedIn_AndThereArePlaylists_PlaylistsReturnsUnCoolPlaylists() throws Exception {
+    repository.save(new Playlist("New Playlist", false));
+    repository.save(new Playlist("Another Playlist", false));
+    mvc.perform(MockMvcRequestBuilders.get("/api/playlists/uncool").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$", hasSize(2)));
+  }
+
+  @Test
+  @WithMockUser
   void WhenLoggedIn_AndThereArePlaylists_PlaylistIndexReturnsTracks() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
     repository.save(new Playlist("My Playlist", false, Set.of(track)));
