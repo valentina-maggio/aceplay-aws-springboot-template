@@ -29,9 +29,11 @@ class PlaylistsControllerIntegrationTest {
   @Autowired
   private MockMvc mvc;
 
-  @Autowired private TrackRepository trackRepository;
+  @Autowired
+  private TrackRepository trackRepository;
 
-  @Autowired private PlaylistRepository repository;
+  @Autowired
+  private PlaylistRepository repository;
 
   @Test
   void WhenLoggedOut_PlaylistsIndexReturnsForbidden() throws Exception {
@@ -52,14 +54,15 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_AndThereArePlaylists_PlaylistIndexReturnsTracks() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    repository.save(new Playlist("My Playlist", Set.of(track)));
-    repository.save(new Playlist("Their Playlist"));
+    repository.save(new Playlist("My Playlist", false, Set.of(track)));
+    repository.save(new Playlist("Their Playlist", true));
 
     mvc.perform(MockMvcRequestBuilders.get("/api/playlists").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].name").value("My Playlist"))
+        .andExpect(jsonPath("$[0].cool").value(false))
         .andExpect(jsonPath("$[0].tracks[0].title").value("Title"))
         .andExpect(jsonPath("$[0].tracks[0].artist").value("Artist"))
         .andExpect(jsonPath("$[0].tracks[0].publicUrl").value("https://example.org/"))
@@ -68,8 +71,9 @@ class PlaylistsControllerIntegrationTest {
 
   @Test
   void WhenLoggedOut_PlaylistsGetReturnsForbidden() throws Exception {
-    Playlist playlist = repository.save(new Playlist("My Playlist"));
-    mvc.perform(MockMvcRequestBuilders.get("/api/playlists/" + playlist.getId()).contentType(MediaType.APPLICATION_JSON))
+    Playlist playlist = repository.save(new Playlist("My Playlist", false));
+    mvc.perform(
+        MockMvcRequestBuilders.get("/api/playlists/" + playlist.getId()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden());
   }
 
@@ -84,12 +88,14 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_AndThereIsAPlaylist_PlaylistGetReturnsPlaylist() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    Playlist playlist = repository.save(new Playlist("My Playlist", Set.of(track)));
+    Playlist playlist = repository.save(new Playlist("My Playlist", false, Set.of(track)));
 
-    mvc.perform(MockMvcRequestBuilders.get("/api/playlists/" + playlist.getId()).contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(
+        MockMvcRequestBuilders.get("/api/playlists/" + playlist.getId()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.name").value("My Playlist"))
+        .andExpect(jsonPath("$.cool").value(false))
         .andExpect(jsonPath("$.tracks[0].title").value("Title"))
         .andExpect(jsonPath("$.tracks[0].artist").value("Artist"))
         .andExpect(jsonPath("$.tracks[0].publicUrl").value("https://example.org/"));
@@ -98,9 +104,9 @@ class PlaylistsControllerIntegrationTest {
   @Test
   void WhenLoggedOut_PlaylistPostIsForbidden() throws Exception {
     mvc.perform(
-            MockMvcRequestBuilders.post("/api/playlists")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"My Playlist Name\"}"))
+        MockMvcRequestBuilders.post("/api/playlists")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"name\": \"My Playlist Name\"}"))
         .andExpect(status().isForbidden());
     assertEquals(0, repository.count());
   }
@@ -109,9 +115,9 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_PlaylistPostCreatesNewPlaylist() throws Exception {
     mvc.perform(
-            MockMvcRequestBuilders.post("/api/playlists")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"My Playlist Name\"}"))
+        MockMvcRequestBuilders.post("/api/playlists")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"name\": \"My Playlist Name\"}"))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.name").value("My Playlist Name"))
@@ -125,12 +131,12 @@ class PlaylistsControllerIntegrationTest {
   @Test
   void WhenLoggedOut_PlaylistAddTrackIsForbidden() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    Playlist playlist = repository.save(new Playlist("My Playlist"));
+    Playlist playlist = repository.save(new Playlist("My Playlist", false));
 
     mvc.perform(
-            MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": \"" + track.getId() + "\"}"))
+        MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"id\": \"" + track.getId() + "\"}"))
         .andExpect(status().isForbidden());
 
     Playlist currentPlaylist = repository.findById(playlist.getId()).orElseThrow();
@@ -141,12 +147,12 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_TracksPostCreatesNewTrack() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    Playlist playlist = repository.save(new Playlist("My Playlist"));
+    Playlist playlist = repository.save(new Playlist("My Playlist", false));
 
     mvc.perform(
-            MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": \"" + track.getId() + "\"}"))
+        MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"id\": \"" + track.getId() + "\"}"))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.title").value("Title"));
