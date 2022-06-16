@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import tech.makers.aceplay.track.Track;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.util.Set;
 
 // https://www.youtube.com/watch?v=vreyOZxdb5Y&t=448s
@@ -13,6 +14,7 @@ public class Playlist {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
+  @NotEmpty(message = "Name may not be empty")
   private String name;
 
   private Boolean cool;
@@ -23,15 +25,15 @@ public class Playlist {
   public Playlist() {
   }
 
-  public Playlist(String name) {
+  public Playlist(@NotEmpty String name) {
     this(name, false);
   }
 
-  public Playlist(String name, Boolean isCool) {
+  public Playlist(@NotEmpty String name, Boolean isCool) {
     this(name, isCool, null);
   }
 
-  public Playlist(String name, Boolean isCool, Set<Track> tracks) {
+  public Playlist(@NotEmpty String name, Boolean isCool, Set<Track> tracks) {
     this.name = name;
     this.tracks = tracks;
     this.cool = isCool;
