@@ -6,6 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.validation.constraints.NotEmpty;
 
 // https://www.youtube.com/watch?v=5r3QU09v7ig&t=2999s
 @Entity
@@ -14,21 +15,24 @@ public class Track {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
+  @NotEmpty(message = "Title may not be empty")
   private String title;
 
+  @NotEmpty(message = "Artist may not be empty")
   private String artist;
 
   private URL publicUrl;
 
-  public Track() { }
+  public Track() {
+  }
 
-  public Track(String title, String artist, URL publicUrl) {
+  public Track(@NotEmpty String title, @NotEmpty String artist, URL publicUrl) {
     this.title = title;
     this.artist = artist;
     this.publicUrl = publicUrl;
   }
 
-  public Track(String title, String artist, String publicUrl) throws MalformedURLException {
+  public Track(@NotEmpty String title, @NotEmpty String artist, String publicUrl) throws MalformedURLException {
     this(title, artist, new URL(publicUrl));
   }
 
