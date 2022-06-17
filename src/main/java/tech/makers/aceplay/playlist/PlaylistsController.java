@@ -5,6 +5,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.track.TrackRepository;
+import tech.makers.aceplay.user.User;
+import tech.makers.aceplay.user.UserRepository;
+
+import java.security.Principal;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -17,9 +21,14 @@ public class PlaylistsController {
   @Autowired
   private TrackRepository trackRepository;
 
-  @GetMapping("/api/playlists")
-  public Iterable<Playlist> playlists() {
-    return playlistRepository.findAll();
+  @Autowired
+  private UserRepository userRepository;
+
+  @GetMapping("/api/playlists/")
+  public Iterable<Playlist> playlists(Principal principal) {
+    User user = userRepository.findByUsername(principal.getName());
+    Long userId = user.getId();
+    return playlistRepository.findAllById(userId);
   }
 
   @GetMapping("/api/playlists/cool")
@@ -33,7 +42,9 @@ public class PlaylistsController {
   }
 
   @PostMapping("/api/playlists")
-  public Playlist create(@RequestBody Playlist playlist) {
+  public Playlist create(Principal principal, @RequestBody Playlist playlist) {
+    User user = userRepository.findByUsername(principal.getName());
+    playlist.setUser(user);
     return playlistRepository.save(playlist);
   }
 

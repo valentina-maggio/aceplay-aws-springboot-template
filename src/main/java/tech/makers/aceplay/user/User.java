@@ -24,9 +24,6 @@ public class User implements UserDetails {
 
   private String password;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private Set<Playlist> playlist;
-
   protected User() {
   }
 

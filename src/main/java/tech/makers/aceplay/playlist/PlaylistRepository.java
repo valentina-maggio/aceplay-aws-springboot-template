@@ -9,4 +9,7 @@ public interface PlaylistRepository extends CrudRepository<Playlist, Long> {
   Playlist findFirstByOrderByIdAsc();
 
   List<Playlist> findByCoolEquals(Boolean cool);
+
+  List<Playlist> findAllById(Long userId);
+
 }

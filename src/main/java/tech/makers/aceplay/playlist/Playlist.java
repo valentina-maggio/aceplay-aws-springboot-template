@@ -18,6 +18,7 @@ import java.util.Set;
 public class Playlist {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "id")
   private Long id;
 
   @NotEmpty(message = "Name may not be empty")
@@ -28,24 +29,23 @@ public class Playlist {
   @ManyToMany(fetch = FetchType.EAGER)
   private Set<Track> tracks;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "user_id", nullable = false)
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
   public Playlist() {
   }
 
-  public Playlist(@NotEmpty String name, User user) {
-    this(name, user, false);
+  public Playlist(@NotEmpty String name) {
+    this(name, false);
   }
 
-  public Playlist(@NotEmpty String name, User user, Boolean isCool) {
-    this(name, user, isCool, null);
+  public Playlist(@NotEmpty String name, Boolean isCool) {
+    this(name, isCool, null);
   }
 
-  public Playlist(@NotEmpty String name, User user, Boolean isCool, Set<Track> tracks) {
+  public Playlist(@NotEmpty String name, Boolean isCool, Set<Track> tracks) {
     this.name = name;
-    this.user = user;
     this.tracks = tracks;
     this.cool = isCool;
   }
@@ -72,6 +72,10 @@ public class Playlist {
       return Set.of();
     }
     return tracks;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
   }
 
   @Override
