@@ -21,7 +21,8 @@ dependencies {
   // The JPA Object-Relational Mapper, for accessing Postgres
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
   runtimeOnly 'org.postgresql:postgresql'
-
+  runtimeOnly 'mysql:mysql-connector-java'
+  
   // Spring can do many things. We want it to run a web application, so we depend on that part.
   implementation 'org.springframework.boot:spring-boot-starter-web'
 
