@@ -18,7 +18,7 @@ import java.util.Set;
 public class Playlist {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private User id;
+  private Long id;
 
   @NotEmpty(message = "Name may not be empty")
   private String name;
