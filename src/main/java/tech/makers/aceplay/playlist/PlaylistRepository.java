@@ -10,6 +10,5 @@ public interface PlaylistRepository extends CrudRepository<Playlist, Long> {
 
   List<Playlist> findByCoolEquals(Boolean cool);
 
-  List<Playlist> findAllById(Long userId);
-
+  List<Playlist> findAllByUserId(Long userId);
 }
