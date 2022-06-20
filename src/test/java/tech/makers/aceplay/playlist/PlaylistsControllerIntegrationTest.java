@@ -199,15 +199,23 @@ class PlaylistsControllerIntegrationTest {
         MockMvcRequestBuilders.delete("/api/playlists/" + playlist.getId() + "/tracks/" + track.getId())
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.title").value("Title")
-
-        );
+        .andExpect(status().isOk());
 
     Playlist updatedPlaylist = repository.findById(playlist.getId()).orElseThrow();
 
     assertEquals(0, updatedPlaylist.getTracks().size());
+  }
+
+  @Test
+  @WithMockUser
+  void WhenLoggedIn_DeletesPlaylist() throws Exception {
+    Playlist playlist = repository.save(new Playlist("My Playlist", false));
+
+    mvc.perform(
+        MockMvcRequestBuilders.delete("/api/playlists/" + playlist.getId()))
+        .andExpect(status().isOk());
+
+    assertEquals(0, repository.count());
   }
 
   // Tracks are order by latest added in playlist
