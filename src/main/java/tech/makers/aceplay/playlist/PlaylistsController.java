@@ -28,7 +28,7 @@ public class PlaylistsController {
   public Iterable<Playlist> playlists(Principal principal) {
     User user = userRepository.findByUsername(principal.getName());
     Long userId = user.getId();
-    return playlistRepository.findAllByUserId(userId);
+    return playlistRepository.findByUserId(userId);
   }
 
   @GetMapping("/api/playlists/cool")

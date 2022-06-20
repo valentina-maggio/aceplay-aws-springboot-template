@@ -10,4 +10,7 @@ public interface TrackRepository extends CrudRepository<Track, Long> {
   Track findFirstByOrderByIdAsc();
 
   List<Track> findAllByUserId(Long userId);
+
+  // will this work to order them?
+  // List<Track> findAllByUserIdByOrderByIdAsc(Long userId);
 }
