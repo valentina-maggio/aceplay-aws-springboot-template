@@ -7,6 +7,7 @@ import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.track.TrackRepository;
 import tech.makers.aceplay.user.User;
 import tech.makers.aceplay.user.UserRepository;
+import tech.makers.aceplay.trackaddedtime.TrackAddedTime;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -23,6 +24,9 @@ public class PlaylistsController {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private TrackAddedTime trackAddedTime;
 
   @GetMapping("/api/playlists")
   public Iterable<Playlist> playlists(Principal principal) {
@@ -64,6 +68,9 @@ public class PlaylistsController {
             () -> new ResponseStatusException(NOT_FOUND, "No track exists with id " + trackIdentifierDto.getId()));
     playlist.getTracks().add(track);
     playlistRepository.save(playlist);
+    trackAddedTime.setTime(System.currentTimeMillis());
+    trackAddedTime.setPlaylist(playlist);
+    trackAddedTime.setTrack(track);
     return track;
   }
 

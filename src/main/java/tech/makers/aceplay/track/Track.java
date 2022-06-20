@@ -4,7 +4,10 @@ import tech.makers.aceplay.user.User;
 import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
+
 import javax.validation.constraints.NotEmpty;
+import tech.makers.aceplay.trackaddedtime.TrackAddedTime;
 
 // https://www.youtube.com/watch?v=5r3QU09v7ig&t=2999s
 @Entity
@@ -20,6 +23,9 @@ public class Track {
   private String artist;
 
   private URL publicUrl;
+
+  @OneToMany(mappedBy = "playlist")
+  public Set<TrackAddedTime> trackAddedTime;
 
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_id", referencedColumnName = "id")

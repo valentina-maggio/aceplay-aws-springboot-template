@@ -3,6 +3,7 @@ package tech.makers.aceplay.playlist;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.user.User;
+import tech.makers.aceplay.trackaddedtime.TrackAddedTime;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -20,8 +21,10 @@ public class Playlist {
 
   private Boolean cool;
 
-  @ManyToMany(fetch = FetchType.EAGER)
   private Set<Track> tracks;
+
+  @OneToMany(mappedBy = "track")
+  public Set<TrackAddedTime> trackAddedTime;
 
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "user_id", referencedColumnName = "id")
