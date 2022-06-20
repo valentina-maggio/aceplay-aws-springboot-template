@@ -1,9 +1,7 @@
 package tech.makers.aceplay.track;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import tech.makers.aceplay.user.User;
+import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.validation.constraints.NotEmpty;
@@ -22,6 +20,10 @@ public class Track {
   private String artist;
 
   private URL publicUrl;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
 
   public Track() {
   }
@@ -71,5 +73,9 @@ public class Track {
 
   public void setPublicUrl(URL publicUrl) {
     this.publicUrl = publicUrl;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
   }
 }

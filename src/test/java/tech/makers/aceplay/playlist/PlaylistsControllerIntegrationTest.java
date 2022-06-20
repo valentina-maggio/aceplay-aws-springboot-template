@@ -2,6 +2,7 @@ package tech.makers.aceplay.playlist;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,8 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.track.TrackRepository;
+import tech.makers.aceplay.user.User;
+import tech.makers.aceplay.user.UserRepository;
 
 import java.util.Set;
+import java.security.Principal;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +37,9 @@ class PlaylistsControllerIntegrationTest {
   private TrackRepository trackRepository;
 
   @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
   private PlaylistRepository repository;
 
   @Test
@@ -44,7 +51,24 @@ class PlaylistsControllerIntegrationTest {
   @Test
   @WithMockUser
   void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracks() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/api/playlists").contentType(MediaType.APPLICATION_JSON))
+    Principal mockPrincipal = Mockito.mock(Principal.class);
+    Mockito.when(mockPrincipal.getName()).thenReturn("paul");
+
+    // User mockUser = Mockito.mock(User.class);
+    // Mockito.when(mockUser.getId()).thenReturn("1");
+    // userRepository.save(mockUser);
+
+    User paul = new User("paul", "pass");
+    System.out.println(paul);
+    paul.setId(2L);
+    userRepository.save(paul);
+
+    System.out.println(paul);
+
+    mvc.perform(MockMvcRequestBuilders
+        .get("/api/playlists")
+        .principal(mockPrincipal)
+        .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(0)));

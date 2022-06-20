@@ -2,6 +2,7 @@ package tech.makers.aceplay.playlist;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import tech.makers.aceplay.track.Track;
+import tech.makers.aceplay.user.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -21,6 +22,14 @@ public class Playlist {
 
   @ManyToMany(fetch = FetchType.EAGER)
   private Set<Track> tracks;
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private User user;
+
+  public void setUser(User user) {
+    this.user = user;
+  }
 
   public Playlist() {
   }
