@@ -186,4 +186,82 @@ class PlaylistsControllerIntegrationTest {
     assertEquals(track.getId(), includedTrack.getId());
     assertEquals("Title", includedTrack.getTitle());
   }
+
+  @Test
+  @WithMockUser
+  void WhenLoggedIn_DeletesTrackFromPlaylist() throws Exception {
+    Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
+    Playlist playlist = repository.save(new Playlist("My Playlist", false, Set.of(track)));
+
+    assertEquals(1, playlist.getTracks().size());
+
+    mvc.perform(
+        MockMvcRequestBuilders.delete("/api/playlists/" + playlist.getId() + "/tracks/" + track.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
+
+    Playlist updatedPlaylist = repository.findById(playlist.getId()).orElseThrow();
+
+    assertEquals(0, updatedPlaylist.getTracks().size());
+  }
+
+  @Test
+  @WithMockUser
+  void WhenLoggedIn_DeletesPlaylist() throws Exception {
+    Playlist playlist = repository.save(new Playlist("My Playlist", false));
+
+    mvc.perform(
+        MockMvcRequestBuilders.delete("/api/playlists/" + playlist.getId()))
+        .andExpect(status().isOk());
+
+    assertEquals(0, repository.count());
+  }
+
+  // Tracks are order by latest added in playlist
+  //
+  // @Test
+  // @WithMockUser
+  // void WhenLoggedIn_TracksPostCreatesNewTracks() throws Exception {
+  // Track track1 = trackRepository.save(new Track("Title1", "Artist1",
+  // "https://example.org/"));
+  // Track track2 = trackRepository.save(new Track("Title2", "Artist2",
+  // "https://example.org/"));
+  // Track track3 = trackRepository.save(new Track("Title3", "Artist3",
+  // "https://example.org/"));
+  // Playlist playlist = repository.save(new Playlist("My Playlist", false));
+
+  // mvc.perform(
+  // MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
+  // .contentType(MediaType.APPLICATION_JSON)
+  // .content("{\"id\": \"" + track2.getId() + "\"}"))
+  // .andExpect(status().isOk())
+  // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+  // .andExpect(jsonPath("$.title").value("Title2"));
+
+  // mvc.perform(
+  // MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
+  // .contentType(MediaType.APPLICATION_JSON)
+  // .content("{\"id\": \"" + track1.getId() + "\"}"))
+  // .andExpect(status().isOk())
+  // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+  // .andExpect(jsonPath("$.title").value("Title1"));
+
+  // mvc.perform(
+  // MockMvcRequestBuilders.put("/api/playlists/" + playlist.getId() + "/tracks")
+  // .contentType(MediaType.APPLICATION_JSON)
+  // .content("{\"id\": \"" + track3.getId() + "\"}"))
+  // .andExpect(status().isOk())
+  // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+  // .andExpect(jsonPath("$.title").value("Title3"));
+
+  // Playlist updatedPlaylist =
+  // repository.findById(playlist.getId()).orElseThrow();
+
+  // assertEquals(3, updatedPlaylist.getTracks().size());
+  // Track includedTrack =
+  // updatedPlaylist.getTracks().stream().findFirst().orElseThrow();
+  // assertEquals(track2.getId(), includedTrack.getId());
+  // assertEquals("Title2", includedTrack.getTitle());
+  // }
 }
