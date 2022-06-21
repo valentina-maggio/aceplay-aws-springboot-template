@@ -6,7 +6,6 @@ import tech.makers.aceplay.user.User;
 import javax.validation.constraints.NotEmpty;
 
 public class PlaylistDto {
-  // id, name, cool, tracks, user,
   private Long id;
   private String name;
   private Boolean cool;
