@@ -1,5 +1,6 @@
 package tech.makers.aceplay.playlist;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,11 @@ public class PlaylistsController {
   }
 
   @PostMapping("/api/playlists")
-  public Playlist create(Principal principal, @RequestBody Playlist playlist) {
+  public Playlist create(Principal principal, @RequestBody PlaylistDto playlistDto) {
+
+    Playlist playlist = new Playlist();
+    BeanUtils.copyProperties(playlistDto, playlist);
+
     User user = userRepository.findByUsername(principal.getName());
     playlist.setUser(user);
     return playlistRepository.save(playlist);
