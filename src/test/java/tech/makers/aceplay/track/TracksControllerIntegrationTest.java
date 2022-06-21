@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.track.TrackRepository;
+import tech.makers.aceplay.user.User;
+import tech.makers.aceplay.user.UserRepository;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,13 +27,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TracksControllerIntegrationTest {
-  @Autowired private MockMvc mvc;
+  @Autowired
+  private MockMvc mvc;
 
-  @Autowired private TrackRepository repository;
+  @Autowired
+  private TrackRepository repository;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @Test
-  @WithMockUser
+  @WithMockUser(username = "paul")
   void WhenLoggedIn_AndThereAreNoTracks_TracksIndexReturnsNoTracks() throws Exception {
+    String username = "paul";
+    String password = "pass";
+    User paul = new User(username, password);
+    paul.setId(2L);
+    userRepository.save(paul);
+
     mvc.perform(MockMvcRequestBuilders.get("/api/tracks").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -39,10 +52,19 @@ class TracksControllerIntegrationTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(username = "paul")
   void WhenLoggedIn_AndThereAreTracks_TracksIndexReturnsTracks() throws Exception {
-    repository.save(new Track("Blue Line Swinger", "Yo La Tengo", "http://example.org/track.mp3"));
-    repository.save(new Track("Morning Light", "Girls", "http://example.org/track.mp3"));
+    String username = "paul";
+    String password = "pass";
+    User paul = new User(username, password);
+    paul.setId(10L);
+    Track track1 = new Track("Blue Line Swinger", "Yo La Tengo", "http://example.org/track.mp3");
+    Track track2 = new Track("Morning Light", "Girls", "http://example.org/track.mp3");
+    track1.setUser(paul);
+    track2.setUser(paul);
+    userRepository.save(paul);
+    repository.save(track1);
+    repository.save(track2);
 
     mvc.perform(MockMvcRequestBuilders.get("/api/tracks").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -63,10 +85,12 @@ class TracksControllerIntegrationTest {
   @Test
   @WithMockUser
   void WhenLoggedIn_TracksPostCreatesNewTrack() throws Exception {
+
     mvc.perform(
-            MockMvcRequestBuilders.post("/api/tracks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\": \"Blue Line Swinger\", \"artist\": \"Yo La Tengo\", \"publicUrl\": \"https://example.org/track.mp3\"}"))
+        MockMvcRequestBuilders.post("/api/tracks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                "{\"title\": \"Blue Line Swinger\", \"artist\": \"Yo La Tengo\", \"publicUrl\": \"https://example.org/track.mp3\"}"))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.title").value("Blue Line Swinger"))
@@ -93,9 +117,9 @@ class TracksControllerIntegrationTest {
   void WhenLoggedIn_TrackUpdateUpdatesTrack() throws Exception {
     Track track = repository.save(new Track("Blue Line Swinger", "Yo La Tengo", "https://example.org/track.mp3"));
     mvc.perform(
-            MockMvcRequestBuilders.patch("/api/tracks/" + track.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\": \"Stars\", \"artist\": \"Hum\"}"))
+        MockMvcRequestBuilders.patch("/api/tracks/" + track.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"title\": \"Stars\", \"artist\": \"Hum\"}"))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.title").value("Stars"))
@@ -110,9 +134,9 @@ class TracksControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_ButNoTrack_TrackUpdateThrows404() throws Exception {
     mvc.perform(
-            MockMvcRequestBuilders.patch("/api/tracks/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\": \"Stars\"}"))
+        MockMvcRequestBuilders.patch("/api/tracks/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"title\": \"Stars\"}"))
         .andExpect(status().isNotFound());
   }
 
@@ -120,15 +144,14 @@ class TracksControllerIntegrationTest {
   void WhenLoggedOut_TrackUpdateIsForbidden() throws Exception {
     Track track = repository.save(new Track("Blue Line Swinger", "Yo La Tengo", "http://example.org/track.mp3"));
     mvc.perform(
-            MockMvcRequestBuilders.patch("/api/tracks/" + track.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\": \"Stars\"}"))
+        MockMvcRequestBuilders.patch("/api/tracks/" + track.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"title\": \"Stars\"}"))
         .andExpect(status().isForbidden());
 
     Track updatedTrack = repository.findById(track.getId()).orElseThrow();
     assertEquals("Blue Line Swinger", updatedTrack.getTitle());
   }
-
 
   @Test
   @WithMockUser
@@ -136,7 +159,7 @@ class TracksControllerIntegrationTest {
     Track track = repository.save(new Track("Blue Line Swinger", "Yo La Tengo", "https://example.org/track.mp3"));
 
     mvc.perform(
-            MockMvcRequestBuilders.delete("/api/tracks/" + track.getId()))
+        MockMvcRequestBuilders.delete("/api/tracks/" + track.getId()))
         .andExpect(status().isOk());
 
     assertEquals(0, repository.count());
@@ -146,7 +169,7 @@ class TracksControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_ButNoTrack_TrackDeleteThrows404() throws Exception {
     mvc.perform(
-            MockMvcRequestBuilders.delete("/api/tracks/1"))
+        MockMvcRequestBuilders.delete("/api/tracks/1"))
         .andExpect(status().isNotFound());
   }
 
@@ -155,7 +178,7 @@ class TracksControllerIntegrationTest {
     Track track = repository.save(new Track("Blue Line Swinger", "Yo La Tengo", "http://example.org/track.mp3"));
 
     mvc.perform(
-            MockMvcRequestBuilders.delete("/api/tracks/" + track.getId()))
+        MockMvcRequestBuilders.delete("/api/tracks/" + track.getId()))
         .andExpect(status().isForbidden());
 
     assertEquals(1, repository.count());

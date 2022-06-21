@@ -2,7 +2,6 @@ package tech.makers.aceplay.playlist;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +17,6 @@ import tech.makers.aceplay.user.User;
 import tech.makers.aceplay.user.UserRepository;
 
 import java.util.List;
-import java.security.Principal;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,20 +47,14 @@ class PlaylistsControllerIntegrationTest {
   }
 
   @Test
-  @WithMockUser
-  void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracksTrial()
+  @WithMockUser(username = "paul")
+  void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracks()
       throws Exception {
-    UserRepository mockUserRepo = Mockito.mock(UserRepository.class);
     String username = "paul";
     String password = "pass";
     User paul = new User(username, password);
-    Mockito.when(mockUserRepo.findByUsername(username)).thenReturn(paul);
-
-    System.out.println(paul);
     paul.setId(2L);
     userRepository.save(paul);
-
-    System.out.println(paul);
 
     mvc.perform(MockMvcRequestBuilders
         .get("/api/playlists")
@@ -71,22 +63,6 @@ class PlaylistsControllerIntegrationTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(0)));
   }
-
-  // trying a new test
-
-  // @Test
-  // @WithMockUser(username = "fake user", authorities = { "ROLE_USER" })
-
-  // void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracks()
-  // throws Exception {
-
-  // mvc.perform(MockMvcRequestBuilders
-  // .get("/api/playlists")
-  // .contentType(MediaType.APPLICATION_JSON))
-  // .andExpect(status().isOk())
-  // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-  // .andExpect(jsonPath("$", hasSize(0)));
-  // }
 
   @Test
   @WithMockUser
@@ -111,11 +87,16 @@ class PlaylistsControllerIntegrationTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(username = "paul")
   void WhenLoggedIn_AndThereArePlaylists_PlaylistIndexReturnsTracks() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
     repository.save(new Playlist("My Playlist", false, List.of(track)));
     repository.save(new Playlist("Their Playlist", true));
+    String username = "paul";
+    String password = "pass";
+    User paul = new User(username, password);
+    paul.setId(2L);
+    userRepository.save(paul);
 
     mvc.perform(MockMvcRequestBuilders.get("/api/playlists").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())

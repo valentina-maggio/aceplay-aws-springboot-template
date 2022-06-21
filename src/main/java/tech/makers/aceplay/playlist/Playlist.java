@@ -23,7 +23,7 @@ public class Playlist {
   @ManyToMany(fetch = FetchType.EAGER)
   private List<Track> tracks;
 
-  @OneToOne(cascade = CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
