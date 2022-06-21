@@ -17,7 +17,7 @@ import tech.makers.aceplay.track.TrackRepository;
 import tech.makers.aceplay.user.User;
 import tech.makers.aceplay.user.UserRepository;
 
-import java.util.Set;
+import java.util.List;
 import java.security.Principal;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -50,15 +50,14 @@ class PlaylistsControllerIntegrationTest {
 
   @Test
   @WithMockUser
-  void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracks() throws Exception {
-    Principal mockPrincipal = Mockito.mock(Principal.class);
-    Mockito.when(mockPrincipal.getName()).thenReturn("paul");
+  void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracksTrial()
+      throws Exception {
+    UserRepository mockUserRepo = Mockito.mock(UserRepository.class);
+    String username = "paul";
+    String password = "pass";
+    User paul = new User(username, password);
+    Mockito.when(mockUserRepo.findByUsername(username)).thenReturn(paul);
 
-    // User mockUser = Mockito.mock(User.class);
-    // Mockito.when(mockUser.getId()).thenReturn("1");
-    // userRepository.save(mockUser);
-
-    User paul = new User("paul", "pass");
     System.out.println(paul);
     paul.setId(2L);
     userRepository.save(paul);
@@ -67,12 +66,27 @@ class PlaylistsControllerIntegrationTest {
 
     mvc.perform(MockMvcRequestBuilders
         .get("/api/playlists")
-        .principal(mockPrincipal)
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(0)));
   }
+
+  // trying a new test
+
+  // @Test
+  // @WithMockUser(username = "fake user", authorities = { "ROLE_USER" })
+
+  // void WhenLoggedIn_AndThereAreNoPlaylists_PlaylistsIndexReturnsNoTracks()
+  // throws Exception {
+
+  // mvc.perform(MockMvcRequestBuilders
+  // .get("/api/playlists")
+  // .contentType(MediaType.APPLICATION_JSON))
+  // .andExpect(status().isOk())
+  // .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+  // .andExpect(jsonPath("$", hasSize(0)));
+  // }
 
   @Test
   @WithMockUser
@@ -100,7 +114,7 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_AndThereArePlaylists_PlaylistIndexReturnsTracks() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    repository.save(new Playlist("My Playlist", false, Set.of(track)));
+    repository.save(new Playlist("My Playlist", false, List.of(track)));
     repository.save(new Playlist("Their Playlist", true));
 
     mvc.perform(MockMvcRequestBuilders.get("/api/playlists").contentType(MediaType.APPLICATION_JSON))
@@ -134,7 +148,7 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_AndThereIsAPlaylist_PlaylistGetReturnsPlaylist() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    Playlist playlist = repository.save(new Playlist("My Playlist", false, Set.of(track)));
+    Playlist playlist = repository.save(new Playlist("My Playlist", false, List.of(track)));
 
     mvc.perform(
         MockMvcRequestBuilders.get("/api/playlists/" + playlist.getId()).contentType(MediaType.APPLICATION_JSON))
@@ -171,7 +185,7 @@ class PlaylistsControllerIntegrationTest {
 
     Playlist playlist = repository.findFirstByOrderByIdAsc();
     assertEquals("My Playlist Name", playlist.getName());
-    assertEquals(Set.of(), playlist.getTracks());
+    assertEquals(List.of(), playlist.getTracks());
   }
 
   @Test
@@ -215,7 +229,7 @@ class PlaylistsControllerIntegrationTest {
   @WithMockUser
   void WhenLoggedIn_DeletesTrackFromPlaylist() throws Exception {
     Track track = trackRepository.save(new Track("Title", "Artist", "https://example.org/"));
-    Playlist playlist = repository.save(new Playlist("My Playlist", false, Set.of(track)));
+    Playlist playlist = repository.save(new Playlist("My Playlist", false, List.of(track)));
 
     assertEquals(1, playlist.getTracks().size());
 
