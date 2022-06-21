@@ -1,6 +1,7 @@
 package tech.makers.aceplay.playlist;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import tech.makers.aceplay.track.Track;
@@ -44,7 +45,6 @@ public class PlaylistsController {
   @PostMapping("/api/playlists")
   public Playlist create(Principal principal, @RequestBody Playlist playlist) {
     User user = userRepository.findByUsername(principal.getName());
-    // Long userId = user.getId();
     playlist.setUser(user);
     return playlistRepository.save(playlist);
   }
@@ -62,8 +62,13 @@ public class PlaylistsController {
     Track track = trackRepository.findById(trackIdentifierDto.getId())
         .orElseThrow(
             () -> new ResponseStatusException(NOT_FOUND, "No track exists with id " + trackIdentifierDto.getId()));
-    playlist.getTracks().add(track);
-    playlistRepository.save(playlist);
+    try {
+      playlist.getTracks().add(track);
+      playlistRepository.save(playlist);
+    } catch (Exception e) {
+      throw new ResponseStatusException(
+          HttpStatus.EXPECTATION_FAILED, "Track already in playlist", e);
+    }
     return track;
   }
 
