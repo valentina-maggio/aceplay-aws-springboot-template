@@ -21,7 +21,7 @@ public class Track {
 
   private URL publicUrl;
 
-  @OneToOne(cascade = CascadeType.ALL)
+  @OneToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "user_id", referencedColumnName = "id")
   private User user;
 
