@@ -5,6 +5,9 @@ import javax.persistence.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.validation.constraints.NotEmpty;
+import java.util.Set;
+
+import tech.makers.aceplay.playlisttracks.PlaylistTracks;
 
 // https://www.youtube.com/watch?v=5r3QU09v7ig&t=2999s
 @Entity
@@ -20,6 +23,9 @@ public class Track {
   private String artist;
 
   private URL publicUrl;
+
+  @OneToMany(mappedBy = "track")
+  private Set<PlaylistTracks> playlists;
 
   @OneToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "user_id", referencedColumnName = "id")

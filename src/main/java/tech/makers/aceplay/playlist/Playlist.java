@@ -6,6 +6,8 @@ import tech.makers.aceplay.user.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import tech.makers.aceplay.playlisttracks.PlaylistTracks;
+import java.util.Collections;
 import java.util.List;
 
 // https://www.youtube.com/watch?v=vreyOZxdb5Y&t=448s
@@ -20,8 +22,9 @@ public class Playlist {
 
   private Boolean cool;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  private List<Track> tracks;
+  @OneToMany(mappedBy = "playlist")
+  @OrderBy(value = "dateAdded")
+  private List<PlaylistTracks> tracks;
 
   @OneToOne(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -42,7 +45,7 @@ public class Playlist {
     this(name, isCool, null);
   }
 
-  public Playlist(@NotEmpty String name, Boolean isCool, List<Track> tracks) {
+  public Playlist(@NotEmpty String name, Boolean isCool, List<PlaylistTracks> tracks) {
     this.name = name;
     this.tracks = tracks;
     this.cool = isCool;
@@ -65,7 +68,7 @@ public class Playlist {
   }
 
   @JsonGetter("tracks")
-  public List<Track> getTracks() {
+  public List<PlaylistTracks> getTracks() {
     if (null == tracks) {
       return List.of();
     }

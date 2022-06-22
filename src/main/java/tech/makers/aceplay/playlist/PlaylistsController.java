@@ -9,6 +9,8 @@ import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.track.TrackRepository;
 import tech.makers.aceplay.user.User;
 import tech.makers.aceplay.user.UserRepository;
+import tech.makers.aceplay.playlisttracks.PlaylistTracks;
+import tech.makers.aceplay.playlisttracks.PlaylistTracksRepository;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -22,6 +24,9 @@ public class PlaylistsController {
 
   @Autowired
   private TrackRepository trackRepository;
+
+  @Autowired
+  private PlaylistTracksRepository playlistTracksRepository;
 
   @Autowired
   private UserRepository userRepository;
@@ -67,13 +72,9 @@ public class PlaylistsController {
     Track track = trackRepository.findById(trackIdentifierDto.getId())
         .orElseThrow(
             () -> new ResponseStatusException(NOT_FOUND, "No track exists with id " + trackIdentifierDto.getId()));
-    try {
-      playlist.getTracks().add(track);
-      playlistRepository.save(playlist);
-    } catch (Exception e) {
-      throw new ResponseStatusException(
-          HttpStatus.EXPECTATION_FAILED, "Track already in playlist", e);
-    }
+    PlaylistTracks playlistTracks = new PlaylistTracks(playlist, track);
+
+    playlistTracksRepository.save(playlistTracks);
     return track;
   }
 
