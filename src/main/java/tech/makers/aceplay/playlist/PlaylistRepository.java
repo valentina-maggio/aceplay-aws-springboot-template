@@ -8,6 +8,8 @@ import org.springframework.data.repository.CrudRepository;
 public interface PlaylistRepository extends CrudRepository<Playlist, Long> {
   Playlist findFirstByOrderByIdAsc();
 
+  // Playlist findFirstByUserId(Long id);
+
   List<Playlist> findByCoolEquals(Boolean cool);
 
   List<Playlist> findByUserId(Long userId);

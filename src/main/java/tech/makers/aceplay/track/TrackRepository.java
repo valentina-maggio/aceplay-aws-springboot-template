@@ -8,5 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface TrackRepository extends CrudRepository<Track, Long> {
   Track findFirstByOrderByIdAsc();
 
+  // Track findFirstByUserId(Long id);
+
   List<Track> findAllByUserId(Long userId);
 }

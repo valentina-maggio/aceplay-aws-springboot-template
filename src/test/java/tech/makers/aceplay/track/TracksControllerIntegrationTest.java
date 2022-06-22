@@ -16,6 +16,7 @@ import tech.makers.aceplay.track.Track;
 import tech.makers.aceplay.track.TrackRepository;
 import tech.makers.aceplay.user.User;
 import tech.makers.aceplay.user.UserRepository;
+import tech.makers.aceplay.playlist.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +33,9 @@ class TracksControllerIntegrationTest {
 
   @Autowired
   private TrackRepository repository;
+
+  @Autowired
+  private PlaylistRepository playlistRepository;
 
   @Autowired
   private UserRepository userRepository;
@@ -58,13 +62,19 @@ class TracksControllerIntegrationTest {
     String password = "pass";
     User paul = new User(username, password);
     paul.setId(10L);
-    Track track1 = new Track("Blue Line Swinger", "Yo La Tengo", "http://example.org/track.mp3");
-    Track track2 = new Track("Morning Light", "Girls", "http://example.org/track.mp3");
-    track1.setUser(paul);
-    track2.setUser(paul);
     userRepository.save(paul);
-    repository.save(track1);
-    repository.save(track2);
+
+    mvc.perform(
+        MockMvcRequestBuilders.post("/api/tracks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                "{\"title\": \"Blue Line Swinger\", \"artist\": \"Yo La Tengo\", \"publicUrl\": \"https://example.org/track.mp3\"}"));
+
+    mvc.perform(
+        MockMvcRequestBuilders.post("/api/tracks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                "{\"title\": \"Morning Light\", \"artist\": \"Artist 2\", \"publicUrl\": \"https://example.org/track2.mp3\"}"));
 
     mvc.perform(MockMvcRequestBuilders.get("/api/tracks").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -72,7 +82,7 @@ class TracksControllerIntegrationTest {
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].title").value("Blue Line Swinger"))
         .andExpect(jsonPath("$[0].artist").value("Yo La Tengo"))
-        .andExpect(jsonPath("$[0].publicUrl").value("http://example.org/track.mp3"))
+        .andExpect(jsonPath("$[0].publicUrl").value("https://example.org/track.mp3"))
         .andExpect(jsonPath("$[1].title").value("Morning Light"));
   }
 
